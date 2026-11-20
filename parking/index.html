@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+        <label for="vehicle">Choose a vehicle</label>
+        <select name="vehicle" id="vehicle">
+            <option value="motor">motor</option>
+            <option value="car">car</option>
+        </select>
+        <br>
+        <br>
+        <label for="time in">ម៉ោងចូល</label>
+        <input type="time" id="time-in"> 
+        <label for="time in">ម៉ោងចេញ</label>
+        <input type="time" id="time-out"> 
+        <button id="calc">calculate</button><br>
+        <label for="">ថ្លៃផ្ញើរគិតជារៀល</label>
+        <input type="text" id="riel" readonly>
+        <label for="">ថ្លៃផ្ញើរគិតជាដុល្លារ</label>
+        <input type="text" id="usd" readonly>
+
+    <script>
+         const RATES = { car: [500, 1000], moto: [200, 300] }; // [first 8h, after 8h] riel per hour
+  const RIEL_PER_USD = 4000;
+
+  document.getElementById('calc').addEventListener('click', () => {
+    const tin = document.getElementById('time-in').value;
+    const tout = document.getElementById('time-out').value;
+    if (!tin || !tout) { note.textContent = 'សូមបញ្ចូលម៉ោងចូល និងម៉ោងចេញ'; return; }
+
+    const toMin = t => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+    let diff = toMin(tout) - toMin(tin);
+    if (diff < 0) diff += 24 * 60;            // overnight: exit is next day
+
+    const hours = Math.ceil(diff / 60);       // any started hour counts as a full hour
+    const [r1, r2] = RATES[document.getElementById('type').value];
+    // Whole stay is charged at one rate: up to 8h -> r1 per hour, over 8h -> r2 per hour.
+    // Set TIERED = true to charge only the hours beyond 8h at the higher rate.
+    const TIERED = false;
+    const riel = TIERED
+      ? Math.min(hours, 8)  * r1 + Math.max(hours - 8, 0) * r2
+      : hours * (hours > 8 ? r2 : r1);
+
+    document.getElementById('riel').value = riel.toLocaleString() + ' រៀល (៛)';
+    document.getElementById('usd').value = (riel / RIEL_PER_USD).toFixed(2) + ' ដុល្លារ ($)';
+    note.textContent = 'រយៈពេល ${hours} ម៉ោង';
+  });
+    </script>
+</body>
+</html>
